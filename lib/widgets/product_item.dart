@@ -35,7 +35,7 @@ class ProductItem extends StatelessWidget {
             ),
             leading: IconButton(
               iconSize: 16,
-              icon: _obtainFavoriteIcon(context),
+              icon: _obtainFavoriteIcon(),
               onPressed: () => context.read<FavoritesProvider>().toggle(product),
             ),
             trailing: IconButton(
@@ -50,13 +50,10 @@ class ProductItem extends StatelessWidget {
     );
   }
 
-  Widget _obtainFavoriteIcon(BuildContext context) {
-//    return Consumer<FavoritesProvider>(
-//      builder: (ctx, provider, child) => Icon(provider.isFavorite(product) ? Icons.favorite : Icons.favorite_border),
-//    );
-
-    final isFavorite = context.watch<FavoritesProvider>().isFavorite(product);
-    return Icon(isFavorite ? Icons.favorite : Icons.favorite_border);
+  Widget _obtainFavoriteIcon() {
+    return Consumer<FavoritesProvider>(
+      builder: (ctx, provider, child) => Icon(provider.isFavorite(product) ? Icons.favorite : Icons.favorite_border),
+    );
   }
 
   void _navigateToDetails(BuildContext context) {
