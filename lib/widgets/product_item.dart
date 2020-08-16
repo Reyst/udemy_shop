@@ -50,7 +50,11 @@ class ProductItem extends StatelessWidget {
     );
   }
 
-  Icon _obtainFavoriteIcon(BuildContext context) {
+  Widget _obtainFavoriteIcon(BuildContext context) {
+//    return Consumer<FavoritesProvider>(
+//      builder: (ctx, provider, child) => Icon(provider.isFavorite(product) ? Icons.favorite : Icons.favorite_border),
+//    );
+
     final isFavorite = context.watch<FavoritesProvider>().isFavorite(product);
     return Icon(isFavorite ? Icons.favorite : Icons.favorite_border);
   }
