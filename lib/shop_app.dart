@@ -12,6 +12,7 @@ class ShopApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         fontFamily: "Lato",
+        textTheme: ThemeData.light().textTheme.copyWith()
       ),
       routes: routes,
     );

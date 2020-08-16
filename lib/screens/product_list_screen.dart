@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../data/cart_provider.dart';
 import '../data/favorites_provider.dart';
 import '../data/products_provider.dart';
+import '../widgets/badge.dart';
 import '../widgets/product_item.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -18,7 +20,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
   @override
   Widget build(BuildContext context) {
     final favorites = context.watch<FavoritesProvider>();
-    final products = context.watch<ProductProvider>()
+    final products = context
+        .watch<ProductProvider>()
         .loadedProducts
         .where((product) => _currentFilter == FavoriteFilterValue.allItems || favorites.isFavorite(product))
         .toList();
@@ -27,6 +30,21 @@ class _ProductListScreenState extends State<ProductListScreen> {
       appBar: AppBar(
         title: Text("Products"),
         actions: [
+          Consumer<CartProvider>(
+            builder: (ctx, value, child) {
+              return value.productAmount > 0
+                  ? Badge(
+                      child: child,
+                      value: value.productAmount.toString(),
+                      color: Colors.red[900],
+                    )
+                  : child;
+            },
+            child: IconButton(
+              icon: Icon(Icons.shopping_cart),
+              onPressed: () {},
+            ),
+          ),
           PopupMenuButton(
             onSelected: (FavoriteFilterValue selected) => _applyFilter(selected),
             icon: Icon(Icons.more_vert),
