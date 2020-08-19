@@ -12,6 +12,8 @@ class CartProvider with ChangeNotifier {
 
   double get total => _cart.entries.fold(0.0, (value, entry) => value + entry.value.entryTotal);
 
+  List<CartItem> get items => _cart.values.toList();
+
   void addProduct(Product product, {int quantity = 1}) {
     if (_cart.containsKey(product.id)) {
       _cart.update(
@@ -31,5 +33,12 @@ class CartProvider with ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  void removeRecord(String productId) {
+    if (_cart.containsKey(productId)) {
+      _cart.remove(productId);
+      notifyListeners();
+    }
   }
 }
