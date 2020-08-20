@@ -41,4 +41,11 @@ class CartProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void clear() {
+    if (_cart.isNotEmpty) {
+      _cart.clear();
+      notifyListeners();
+    }
+  }
 }

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../data/orders_provider.dart';
 import '../data/cart_provider.dart';
 
 class CartSummary extends StatelessWidget {
@@ -45,7 +46,11 @@ class CartSummary extends StatelessWidget {
                 "Create Order".toUpperCase(),
                 style: TextStyle(color: Theme.of(context).accentColor),
               ),
-              onPressed: () {},
+              onPressed: () {
+                final cartProvider = context.read<CartProvider>();
+                context.read<OrdersProvider>().createOrder(cartProvider.items);
+                cartProvider.clear();
+              },
             )
           ],
         ),

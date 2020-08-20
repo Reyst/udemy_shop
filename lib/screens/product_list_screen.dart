@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../widgets/app_drawer.dart';
 import 'cart_screen.dart';
 import '../data/cart_provider.dart';
 import '../data/favorites_provider.dart';
@@ -28,6 +29,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         .toList();
 
     return Scaffold(
+      drawer: AppDrawer(),
       appBar: AppBar(
         title: Text("Products"),
         actions: [
