@@ -9,11 +9,10 @@ class ShopApp extends StatelessWidget {
     return MaterialApp(
       title: 'Udemy Shop',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        fontFamily: "Lato",
-        textTheme: ThemeData.light().textTheme.copyWith()
-      ),
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          fontFamily: "Lato",
+          textTheme: ThemeData.light().textTheme.copyWith()),
       routes: routes,
     );
   }

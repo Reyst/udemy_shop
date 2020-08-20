@@ -35,6 +35,20 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void removeProduct(Product product) {
+
+    final CartItem record = _cart[product.id];
+
+    if (record != null) {
+      final qty = record.quantity - 1;
+
+      if (qty == 0) _cart.remove(product.id);
+      else _cart.update(product.id, (value) => value.copyWithQuantity(qty));
+
+      notifyListeners();
+    }
+  }
+
   void removeRecord(String productId) {
     if (_cart.containsKey(productId)) {
       _cart.remove(productId);
