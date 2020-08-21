@@ -6,10 +6,10 @@ import '../data/favorites_provider.dart';
 import '../models/product.dart';
 import '../screens/product_detail_screen.dart';
 
-class ProductItem extends StatelessWidget {
+class ProductGridItem extends StatelessWidget {
   final Product product;
 
-  const ProductItem({Key key, this.product}) : super(key: key);
+  const ProductGridItem({Key key, this.product}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

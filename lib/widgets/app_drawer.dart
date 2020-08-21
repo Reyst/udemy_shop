@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:udemy_shop/screens/order_list_screen.dart';
-import 'package:udemy_shop/screens/product_list_screen.dart';
+
+import '../screens/order_list_screen.dart';
+import '../screens/product_list_screen.dart';
+import '../screens/products_management_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -9,11 +11,13 @@ class AppDrawer extends StatelessWidget {
       elevation: 4,
       child: Column(
         children: [
-          DrawerHeader(
-            child: Text("Shop app"),
+          AppBar(
+            title: Text("Shop app"),
+            automaticallyImplyLeading: false,
           ),
-          _buildDrawerOption(context, Icons.apps, "Products", () => _switchTo(context, ProductListScreen.route)),
-          _buildDrawerOption(context, Icons.description, "Orders", () => _switchTo(context, OrderListScreen.route))
+          _buildDrawerOption(context, Icons.shop_two, "Products", () => _switchTo(context, ProductListScreen.route)),
+          _buildDrawerOption(context, Icons.payment, "Orders", () => _switchTo(context, OrderListScreen.route)),
+          _buildDrawerOption(context, Icons.assessment, "Product management", () => _switchTo(context, ProductsManagementScreen.route)),
         ],
       ),
     );

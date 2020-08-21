@@ -7,7 +7,7 @@ import '../data/cart_provider.dart';
 import '../data/favorites_provider.dart';
 import '../data/products_provider.dart';
 import '../widgets/badge.dart';
-import '../widgets/product_item.dart';
+import '../widgets/product_grid_item.dart';
 
 class ProductListScreen extends StatefulWidget {
   static const String route = "/";
@@ -67,7 +67,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: products.length,
-        itemBuilder: (ctx, index) => ProductItem(product: products[index]),
+        itemBuilder: (ctx, index) => ProductGridItem(product: products[index]),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 10,
