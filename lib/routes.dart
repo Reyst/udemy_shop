@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'screens/edit_product_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/order_list_screen.dart';
 import 'screens/product_detail_screen.dart';
@@ -12,4 +13,5 @@ Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   CartScreen.route: (ctx) => CartScreen(),
   OrderListScreen.route: (ctx) => OrderListScreen(),
   ProductsManagementScreen.route: (ctx) => ProductsManagementScreen(),
+  EditProductScreen.route: (ctx) => EditProductScreen.forNavigation(ctx),
 };

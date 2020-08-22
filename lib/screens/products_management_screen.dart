@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'edit_product_screen.dart';
 import '../global/dialogs.dart';
 import '../models/product.dart';
 import '../data/products_provider.dart';
@@ -18,7 +19,7 @@ class ProductsManagementScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.add),
-            onPressed: () {},
+            onPressed: () => Navigator.of(context).pushNamed(EditProductScreen.route),
           ),
         ],
       ),
@@ -30,6 +31,7 @@ class ProductsManagementScreen extends StatelessWidget {
           itemBuilder: (ctx, index) => ProductListItem(
             product: provider.loadedProducts[index],
             onDeleteAction: (product) => _confirmAndDelete(ctx, product),
+            onEditAction: (product) => _editProduct(ctx, product),
           ),
         ),
       ),
@@ -45,5 +47,9 @@ class ProductsManagementScreen extends StatelessWidget {
         context.read<ProductProvider>().removeProduct(product);
       }
     });
+  }
+
+  void _editProduct(BuildContext context, Product product) {
+    Navigator.of(context).pushNamed(EditProductScreen.route, arguments: product);
   }
 }

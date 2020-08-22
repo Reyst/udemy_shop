@@ -62,4 +62,14 @@ class ProductProvider with ChangeNotifier {
     _favorites.remove(product.id);
     notifyListeners();
   }
+
+  void setProduct(Product product) {
+
+    final index = _loadedProducts.indexWhere((item) => item.id == product.id);
+
+    if(index == -1) _loadedProducts.add(product);
+    else _loadedProducts[index] = product;
+
+    notifyListeners();
+  }
 }
