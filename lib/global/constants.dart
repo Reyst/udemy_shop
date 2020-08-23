@@ -1,0 +1,1 @@
+const String BASE_URL = "https://study-456d5.firebaseio.com/";
