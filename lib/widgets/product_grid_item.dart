@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../data/cart_provider.dart';
-import '../data/favorites_provider.dart';
 import '../models/product.dart';
-import '../screens/product_detail_screen.dart';
 
 class ProductGridItem extends StatelessWidget {
   final Product product;
+  final bool isFavorite;
+  final void Function(Product) onItemTap;
+  final void Function(Product) onFavoriteTap;
+  final void Function(Product) onCartTap;
 
-  const ProductGridItem({Key key, this.product}) : super(key: key);
+  const ProductGridItem({
+    Key key,
+    @required this.product,
+    this.isFavorite = false,
+    this.onItemTap,
+    this.onFavoriteTap,
+    this.onCartTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,53 +43,18 @@ class ProductGridItem extends StatelessWidget {
             ),
             leading: IconButton(
               iconSize: 16,
-              icon: _obtainFavoriteIcon(),
-              onPressed: () => context.read<FavoritesProvider>().toggle(product),
+              icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+              onPressed: () => onFavoriteTap(product),//() => context.read<FavoritesProvider>().toggle(product),
             ),
             trailing: IconButton(
               iconSize: 16,
-              onPressed: () => _addProductToCart(context),
+              onPressed: () => onCartTap(product), //() => _addProductToCart(context),
               icon: Icon(Icons.shopping_cart),
             ),
           ),
         ),
       ),
-      onTap: () => _navigateToDetails(context),
+      onTap: () => onItemTap(product),
     );
-  }
-
-  void _addProductToCart(BuildContext context) {
-    final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    final parentScaffold = Scaffold.of(context);
-
-    cartProvider.addProduct(product);
-
-    parentScaffold.hideCurrentSnackBar();
-    parentScaffold.showSnackBar(
-      SnackBar(
-        content: Container(
-          padding: const EdgeInsets.all(8),
-          child: Text(
-            '${product.title} has been added to cart!',
-            style: TextStyle(fontSize: 24),
-          ),
-        ),
-        duration: Duration(seconds: 3),
-        action: SnackBarAction(
-          label: 'UNDO',
-          onPressed: () => cartProvider.removeProduct(product),
-        ),
-      ),
-    );
-  }
-
-  Widget _obtainFavoriteIcon() {
-    return Consumer<FavoritesProvider>(
-      builder: (ctx, provider, child) => Icon(provider.isFavorite(product) ? Icons.favorite : Icons.favorite_border),
-    );
-  }
-
-  void _navigateToDetails(BuildContext context) {
-    Navigator.of(context).pushNamed(ProductDetailScreen.route, arguments: product);
   }
 }

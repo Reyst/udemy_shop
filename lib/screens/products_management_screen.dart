@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'edit_product_screen.dart';
+import '../data/products_provider.dart';
 import '../global/dialogs.dart';
 import '../models/product.dart';
-import '../data/products_provider.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/product_list_item.dart';
+import 'edit_product_screen.dart';
 
 class ProductsManagementScreen extends StatelessWidget {
   static const String route = "/products-management";
@@ -25,15 +25,32 @@ class ProductsManagementScreen extends StatelessWidget {
       ),
       drawer: AppDrawer(),
       body: Consumer<ProductProvider>(
-        builder: (_, provider, __) => ListView.builder(
-          padding: const EdgeInsets.all(8),
-          itemCount: provider.loadedProducts.length,
-          itemBuilder: (ctx, index) => ProductListItem(
-            product: provider.loadedProducts[index],
-            onDeleteAction: (product) => _confirmAndDelete(ctx, product),
-            onEditAction: (product) => _editProduct(ctx, product),
-          ),
-        ),
+        builder: (_, provider, __) {
+          return FutureBuilder<List<Product>>(
+            initialData: [],
+            future: provider.loadedProducts,
+            builder: (ctx, snapShot) {
+
+              if(snapShot.connectionState != ConnectionState.done && !snapShot.hasData)
+                return Center(child: CircularProgressIndicator());
+
+              if(snapShot.hasError) {
+                showErrorDialog(ctx, content: snapShot.error.toString());
+                return null;
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: snapShot.data.length,
+                itemBuilder: (ctx, index) => ProductListItem(
+                  product: snapShot.data[index],
+                  onDeleteAction: (product) => _confirmAndDelete(ctx, product),
+                  onEditAction: (product) => _editProduct(ctx, product),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

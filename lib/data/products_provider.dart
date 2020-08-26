@@ -1,75 +1,109 @@
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as Http;
+
+import '../global/constants.dart';
 import '../models/product.dart';
 
 class ProductProvider with ChangeNotifier {
-  final List<Product> _loadedProducts = [
-    Product(
-      id: 'p1',
-      title: 'Red Shirt',
-      description: 'A red shirt - it is pretty red!',
-      price: 29.99,
-      imageUrl: 'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
-    ),
-    Product(
-      id: 'p2',
-      title: 'Trousers',
-      description: 'A nice pair of trousers.',
-      price: 59.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Trousers%2C_dress_%28AM_1960.022-8%29.jpg/512px-Trousers%2C_dress_%28AM_1960.022-8%29.jpg',
-    ),
-    Product(
-      id: 'p3',
-      title: 'Yellow Scarf',
-      description: 'Warm and cozy - exactly what you need for the winter.',
-      price: 19.99,
-      imageUrl: 'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
-    ),
-    Product(
-      id: 'p4',
-      title: 'A Pan',
-      description: 'Prepare any meal you want.',
-      price: 49.99,
-      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),
-  ];
+  final List<Product> _loadedProducts = [];
 
-  final Set<String> _favorites = Set();
+  Future<List<Product>> get loadedProducts async => await _loadProducts();
 
-  List<Product> get loadedProducts => [..._loadedProducts];
+  Future<List<Product>> _loadProducts() async {
+//    if (_loadedProducts.isEmpty) {
 
-  List<Product> get favoriteProducts => _loadedProducts.where((item) => _favorites.contains(item.id)).toList();
+    _loadedProducts.clear();
+    try {
+      final response = await Http.get("${BASE_URL}products.json"); //
+      final Map<String, dynamic> loadedData = json.decode(response.body);
 
-  void addToFavorites(Product product) => addToFavoritesById(product.id);
-
-  void addToFavoritesById(String productId) {
-    if (_favorites.add(productId)) {
-      notifyListeners();
+      loadedData.entries
+          .map(
+            (productEntry) => Product(
+              id: productEntry.key,
+              title: productEntry.value['title'],
+              description: productEntry.value['description'],
+              price: productEntry.value['price'],
+              imageUrl: productEntry.value['imageUrl'],
+            ),
+          )
+          .forEach((product) => _loadedProducts.add(product));
+    } catch (error) {
+      throw error;
     }
+//    }
+
+    return [..._loadedProducts];
   }
 
-  void removeFromFavorites(Product product) => removeFromFavoritesById(product.id);
+  Future<void> removeProduct(Product product) async {
+    try {
 
-  void removeFromFavoritesById(String productId) {
-    if (_favorites.remove(productId)) {
+      final url = "${BASE_URL}products/${product.id}.json";
+      await Http.delete(url);
+
+      _loadedProducts.removeWhere((item) => item.id == product.id);
       notifyListeners();
-    }
+    } catch (error) {}
   }
 
-  void removeProduct(Product product) {
-    _loadedProducts.removeWhere((item) => item.id == product.id);
-    _favorites.remove(product.id);
-    notifyListeners();
+  Future<void> setProduct(Product product) async {
+    try {
+      Product updatedProduct;
+      if (product.id == null)
+        updatedProduct = await _postNewProduct(product);
+      else
+        updatedProduct = await _updateProduct(product);
+
+      final index = _loadedProducts.indexWhere((item) => item.id == updatedProduct.id);
+
+      if (index == -1) _loadedProducts.add(updatedProduct);
+      else _loadedProducts[index] = updatedProduct;
+
+      notifyListeners();
+    } catch (error) {}
   }
 
-  void setProduct(Product product) {
+  Future<Product> _postNewProduct(Product product) async {
+    final url = "${BASE_URL}products.json";
 
-    final index = _loadedProducts.indexWhere((item) => item.id == product.id);
+    final response = await Http.post(
+      url,
+      body: _encodeProduct(product),
+    );
 
-    if(index == -1) _loadedProducts.add(product);
-    else _loadedProducts[index] = product;
+    final data = json.decode(response.body);
 
-    notifyListeners();
+    return Product(
+      id: data['name'],
+      title: product.title,
+      description: product.description,
+      imageUrl: product.imageUrl,
+      price: product.price,
+    );
+  }
+
+  Future<Product> _updateProduct(Product product) async {
+    final url = "${BASE_URL}products/${product.id}.json";
+
+    await Http.patch(
+      url,
+      body: _encodeProduct(product),
+    );
+
+    return product;
+  }
+
+  String _encodeProduct(Product product) {
+    return json.encode(
+      {
+        "title": product.title,
+        "description": product.description,
+        "price": product.price,
+        "imageUrl": product.imageUrl,
+      },
+    );
   }
 }

@@ -16,8 +16,7 @@ class ProductDetailScreen extends StatelessWidget {
 
   ProductDetailScreen.forNavigation(BuildContext context) : this(product: _obtainNavigationParameters(context));
 
-  static Product _obtainNavigationParameters(BuildContext context) =>
-      ModalRoute.of(context).settings.arguments as Product;
+  static Product _obtainNavigationParameters(BuildContext context) => ModalRoute.of(context).settings.arguments as Product;
 
   @override
   Widget build(BuildContext context) {
@@ -47,9 +46,12 @@ class ProductDetailScreen extends StatelessWidget {
                         children: [
                           IconButton(
                             icon: Consumer<FavoritesProvider>(
-                              builder: (ctx, value, child) => Icon(
-                                value.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
-                                color: Colors.white,
+                              builder: (ctx, provider, child) => FutureBuilder<bool>(
+                                future: provider.isFavorite(product),
+                                builder: (c, snapShot) => Icon(
+                                  (snapShot.hasData && snapShot.data) ? Icons.favorite : Icons.favorite_border,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                             onPressed: () => context.read<FavoritesProvider>().toggle(product),

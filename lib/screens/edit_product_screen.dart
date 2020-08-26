@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
 import '../data/products_provider.dart';
 import '../models/product.dart';
@@ -166,7 +165,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       formState.save();
 
       final product = Product(
-        id: _createFlag ? Uuid().v4().toUpperCase() : widget.product.id,
+        id: _createFlag ? null : widget.product.id,
         title: _title,
         description: _description,
         imageUrl: _imageUrl,
