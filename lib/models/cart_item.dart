@@ -8,7 +8,7 @@ class CartItem {
   final double price;
   final int quantity;
 
-  CartItem._internal({
+  CartItem({
     @required this.id,
     @required this.productId,
     @required this.title,
@@ -17,7 +17,7 @@ class CartItem {
   }) : assert(quantity > 0);
 
   factory CartItem.newItem(String productId, String title, double price, {int quantity = 1}) {
-    return CartItem._internal(
+    return CartItem(
       id: Uuid().v4().toString(),
       productId: productId,
       title: title,
@@ -30,7 +30,7 @@ class CartItem {
 
   CartItem copyWithQuantity(int newQuantity) {
     assert(newQuantity > 0);
-    return CartItem._internal(
+    return CartItem(
       id: id,
       productId: productId,
       title: title,

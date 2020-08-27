@@ -1,13 +1,11 @@
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../data/orders_provider.dart';
-import '../data/cart_provider.dart';
 
 class CartSummary extends StatelessWidget {
+  final double total;
+  final void Function() onCreateOrderAction;
+  final bool inProgress;
 
-  const CartSummary({Key key}) : super(key: key);
+  const CartSummary({Key key, this.total = 0, this.onCreateOrderAction, this.inProgress = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,33 +26,31 @@ class CartSummary extends StatelessWidget {
             Spacer(),
             Chip(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              label: Consumer<CartProvider>(
-                builder: (ctx, value, child) {
-                  return Text(
-                    "\$${value.total.toStringAsFixed(2)}",
-                    style: Theme.of(ctx).textTheme.subtitle1.copyWith(
+              label: Text(
+                "\$${total.toStringAsFixed(2)}",
+                style: Theme.of(context).textTheme.subtitle1.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
-                  );
-                },
               ),
               backgroundColor: Theme.of(context).primaryColor,
             ),
-            FlatButton(
-              child: Text(
-                "Create Order".toUpperCase(),
-                style: TextStyle(color: Theme.of(context).accentColor),
-              ),
-              onPressed: () {
-                final cartProvider = context.read<CartProvider>();
-                context.read<OrdersProvider>().createOrder(cartProvider.items);
-                cartProvider.clear();
-              },
-            )
+            _getButton(context),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _getButton(BuildContext context) {
+    return FlatButton(
+      child: (inProgress)
+          ? Center(child: CircularProgressIndicator())
+          : Text(
+              "Create Order".toUpperCase(),
+              style: TextStyle(color: Theme.of(context).accentColor),
+            ),
+      onPressed: (!inProgress && total > 0) ? onCreateOrderAction : null,
     );
   }
 }

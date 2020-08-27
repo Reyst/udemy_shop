@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../widgets/cart_item_widget.dart';
 import '../data/cart_provider.dart';
+import '../data/orders_provider.dart';
+import '../widgets/cart_item_widget.dart';
 import '../widgets/cart_summary.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   static const String route = "/cart";
+
+  @override
+  _CartScreenState createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  bool _inProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +22,15 @@ class CartScreen extends StatelessWidget {
       appBar: AppBar(title: Text("Your cart")),
       body: Column(
         children: [
-          CartSummary(),
+          Consumer<CartProvider>(
+            builder: (ctx, provider, child) {
+              return CartSummary(
+                total: provider.total,
+                onCreateOrderAction: () => _createOrder(),
+                inProgress: _inProgress,
+              );
+            },
+          ),
           Expanded(
             flex: 1,
             child: Consumer<CartProvider>(builder: (ctx, value, child) {
@@ -31,5 +47,15 @@ class CartScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _createOrder() {
+    setState(() => _inProgress = true);
+    final cartProvider = context.read<CartProvider>();
+
+    context.read<OrdersProvider>().createOrder(cartProvider.items).then((_) {
+      cartProvider.clear();
+      setState(() => _inProgress = false);
+    }).catchError((e) => setState(() => _inProgress = false));
   }
 }

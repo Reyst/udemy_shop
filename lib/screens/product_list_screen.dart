@@ -78,12 +78,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 itemCount: snapShot.data.length,
                 itemBuilder: (c, index) => FutureBuilder<bool>(
                   future: fProvider.isFavorite(snapShot.data[index]),
-                  builder: (_, favoriteSnap) => ProductGridItem(
+                  builder: (bContext, favoriteSnap) => ProductGridItem(
                     product: snapShot.data[index],
                     isFavorite: favoriteSnap.hasData && favoriteSnap.data,
                     onItemTap: _navigateToDetails,
                     onFavoriteTap: _toggleFavorite,
-                    onCartTap: _addProductToCart,
+                    onCartTap: (product) => _addProductToCart(bContext, product),
                   ),
                 ),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -104,11 +104,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
     context.read<FavoritesProvider>().toggle(product);
   }
 
-  void _addProductToCart(Product product) {
+  void _addProductToCart(BuildContext ctx, Product product) {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     cartProvider.addProduct(product);
 
-    final parentScaffold = Scaffold.of(context);
+    final parentScaffold = Scaffold.of(ctx);
 
     parentScaffold.hideCurrentSnackBar();
     parentScaffold.showSnackBar(
