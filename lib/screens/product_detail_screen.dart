@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../data/products_provider.dart';
 import '../data/cart_provider.dart';
-import '../data/favorites_provider.dart';
 import '../models/product.dart';
 
 class ProductDetailScreen extends StatelessWidget {
@@ -45,16 +45,13 @@ class ProductDetailScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: Consumer<FavoritesProvider>(
-                              builder: (ctx, provider, child) => FutureBuilder<bool>(
-                                future: provider.isFavorite(product),
-                                builder: (c, snapShot) => Icon(
-                                  (snapShot.hasData && snapShot.data) ? Icons.favorite : Icons.favorite_border,
-                                  color: Colors.white,
-                                ),
+                            icon: Consumer<ProductProvider>(
+                              builder: (ctx, provider, child) => Icon(
+                                (provider.isFavorite(product)) ? Icons.favorite : Icons.favorite_border,
+                                color: Colors.white,
                               ),
                             ),
-                            onPressed: () => context.read<FavoritesProvider>().toggle(product),
+                            onPressed: () => context.read<ProductProvider>().toggle(product),
                           ),
                           IconButton(
                             icon: Icon(

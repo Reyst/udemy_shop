@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../global/dialogs.dart';
-import '../models/product.dart';
 import '../data/cart_provider.dart';
-import '../data/favorites_provider.dart';
 import '../data/products_provider.dart';
+import '../models/product.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/badge.dart';
 import '../widgets/product_grid_item.dart';
-import 'product_detail_screen.dart';
 import 'cart_screen.dart';
+import 'product_detail_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
   static const String route = "/";
@@ -21,6 +19,14 @@ class ProductListScreen extends StatefulWidget {
 
 class _ProductListScreenState extends State<ProductListScreen> {
   FavoriteFilterValue _currentFilter = FavoriteFilterValue.allItems;
+
+  Future<void> _loading;
+
+  @override
+  void initState() {
+    _loading = context.read<ProductProvider>().fetchData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,37 +66,32 @@ class _ProductListScreenState extends State<ProductListScreen> {
           )
         ],
       ),
-      body: Consumer2<FavoritesProvider, ProductProvider>(
-        builder: (ctx, fProvider, pProvider, child) {
-          return FutureBuilder<List<Product>>(
-            future: _getProductListWithFilters(pProvider, fProvider),
-            builder: (ctx, snapShot) {
-              if (snapShot.connectionState != ConnectionState.done && !snapShot.hasData)
-                return Center(child: CircularProgressIndicator());
+      body: FutureBuilder(
+        future: _loading,
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) return Center(child: CircularProgressIndicator());
+          return Consumer<ProductProvider>(
+            builder: (c, provider, child) {
+              final products = _currentFilter == FavoriteFilterValue.allItems ? provider.loadedProducts : provider.favoriteProducts;
 
-              if (snapShot.hasError) {
-                showErrorDialog(ctx, content: snapShot.error.toString());
-                return null;
-              }
-
-              return GridView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: snapShot.data.length,
-                itemBuilder: (c, index) => FutureBuilder<bool>(
-                  future: fProvider.isFavorite(snapShot.data[index]),
-                  builder: (bContext, favoriteSnap) => ProductGridItem(
-                    product: snapShot.data[index],
-                    isFavorite: favoriteSnap.hasData && favoriteSnap.data,
+              return RefreshIndicator(
+                onRefresh: () => _refreshData(c),
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: products.length,
+                  itemBuilder: (c, index) => ProductGridItem(
+                    product: products[index],
+                    isFavorite: provider.isFavorite(products[index]),
                     onItemTap: _navigateToDetails,
                     onFavoriteTap: _toggleFavorite,
-                    onCartTap: (product) => _addProductToCart(bContext, product),
+                    onCartTap: (product) => _addProductToCart(ctx, product),
                   ),
-                ),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 2.0 / 3.0,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    childAspectRatio: 2.0 / 3.0,
+                  ),
                 ),
               );
             },
@@ -101,7 +102,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   void _toggleFavorite(Product product) {
-    context.read<FavoritesProvider>().toggle(product);
+    context.read<ProductProvider>().toggle(product);
   }
 
   void _addProductToCart(BuildContext ctx, Product product) {
@@ -136,14 +137,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     }
   }
 
-  Future<List<Product>> _getProductListWithFilters(ProductProvider pProvider, FavoritesProvider fProvider) async {
-    final products = await pProvider.loadedProducts;
-    final favoriteIds = await fProvider.favoritesIds;
-
-    return products
-        .where((product) => _currentFilter == FavoriteFilterValue.allItems || favoriteIds.contains(product.id))
-        .toList();
-  }
+  Future<void> _refreshData(BuildContext context) async => context.read<ProductProvider>().fetchData();
 }
 
 enum FavoriteFilterValue {

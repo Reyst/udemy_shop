@@ -26,29 +26,17 @@ class ProductsManagementScreen extends StatelessWidget {
       drawer: AppDrawer(),
       body: Consumer<ProductProvider>(
         builder: (_, provider, __) {
-          return FutureBuilder<List<Product>>(
-            initialData: [],
-            future: provider.loadedProducts,
-            builder: (ctx, snapShot) {
-
-              if(snapShot.connectionState != ConnectionState.done && !snapShot.hasData)
-                return Center(child: CircularProgressIndicator());
-
-              if(snapShot.hasError) {
-                showErrorDialog(ctx, content: snapShot.error.toString());
-                return null;
-              }
-
-              return ListView.builder(
-                padding: const EdgeInsets.all(8),
-                itemCount: snapShot.data.length,
-                itemBuilder: (ctx, index) => ProductListItem(
-                  product: snapShot.data[index],
-                  onDeleteAction: (product) => _confirmAndDelete(ctx, product),
-                  onEditAction: (product) => _editProduct(ctx, product),
-                ),
-              );
-            },
+          return RefreshIndicator(
+            onRefresh: provider.fetchData,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: provider.loadedProducts.length,
+              itemBuilder: (ctx, index) => ProductListItem(
+                product: provider.loadedProducts[index],
+                onDeleteAction: (product) => _confirmAndDelete(ctx, product),
+                onEditAction: (product) => _editProduct(ctx, product),
+              ),
+            ),
           );
         },
       ),
