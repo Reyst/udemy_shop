@@ -2,11 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as Http;
+import 'package:udemy_shop/models/token.dart';
 
 import '../global/constants.dart';
 import '../models/product.dart';
 
 class ProductProvider with ChangeNotifier {
+
+  String _authKey;
+  String _userId;
+
+  set token(Token token) {
+    _authKey = token?.idToken;
+    _userId = token?.userId;
+    if (_authKey != null) fetchData();
+  }
+
   final List<Product> _loadedProducts = [];
   final Set<String> _favorites = Set();
 
@@ -16,12 +27,15 @@ class ProductProvider with ChangeNotifier {
       _loadedProducts.where((product) => _favorites.contains(product.id)).toList(growable: false);
 
   Future<void> fetchData() async {
-    _loadedProducts.clear();
-    _favorites.clear();
 
     try {
-      _loadedProducts.addAll(await _loadProducts());
-      _favorites.addAll(await _loadFavorites());
+      final prods = await _loadProducts();
+      _loadedProducts.clear();
+      _loadedProducts.addAll(prods);
+
+      final favorites = await _loadFavorites();
+      _favorites.clear();
+      _favorites.addAll(favorites);
     } catch (error) {
       throw error;
     } finally {
@@ -31,15 +45,15 @@ class ProductProvider with ChangeNotifier {
 
   Future<Set<String>> _loadFavorites() async {
     final Set<String> result = Set();
-    final response = await Http.get("${BASE_URL}favorites.json"); //
+    final response = await Http.get("${BASE_URL}favorites.json?auth=$_authKey"); //
 
     if (response.statusCode >= 400) throw Exception();
 
     final Map<String, dynamic> loadedData = json.decode(response.body);
 
-    if (loadedData != null) {
-      final list = (loadedData["ids"] as List<dynamic>) ?? [];
-      list.forEach((item) => _favorites.add(item.toString()));
+    if (loadedData != null && _userId != null) {
+      final list = (loadedData[_userId] as List<dynamic>) ?? [];
+      list.forEach((item) => result.add(item.toString()));
     }
 
     return result;
@@ -47,7 +61,7 @@ class ProductProvider with ChangeNotifier {
 
   Future<List<Product>> _loadProducts() async {
     final List<Product> result = [];
-    final response = await Http.get("${BASE_URL}products.json"); //
+    final response = await Http.get("${BASE_URL}products.json?auth=$_authKey"); //
 
     if (response.statusCode >= 400) throw Exception();
 
@@ -70,7 +84,7 @@ class ProductProvider with ChangeNotifier {
     final index = _loadedProducts.indexWhere((p) => p.id == product.id);
 
     try {
-      final url = "${BASE_URL}products/${product.id}.json";
+      final url = "${BASE_URL}products/${product.id}.json?auth=$_authKey";
       final response = await Http.delete(url);
       if (response.statusCode >= 400) throw Exception();
       _loadedProducts.removeWhere((item) => item.id == product.id);
@@ -101,7 +115,7 @@ class ProductProvider with ChangeNotifier {
   }
 
   Future<Product> _postNewProduct(Product product) async {
-    final url = "${BASE_URL}products.json";
+    final url = "${BASE_URL}products.json?auth=$_authKey";
 
     final response = await Http.post(
       url,
@@ -122,7 +136,7 @@ class ProductProvider with ChangeNotifier {
   }
 
   Future<Product> _updateProduct(Product product) async {
-    final url = "${BASE_URL}products/${product.id}.json";
+    final url = "${BASE_URL}products/${product.id}.json?auth=$_authKey";
 
     final response = await Http.patch(
       url,
@@ -182,9 +196,9 @@ class ProductProvider with ChangeNotifier {
 
   Future _updateRemoteFavorites() async {
     final response = await Http.patch(
-      "${BASE_URL}favorites.json",
+      "${BASE_URL}favorites.json?auth=$_authKey",
       body: json.encode(
-        {"ids": _favorites.toList(growable: false)},
+        {_userId: _favorites.toList(growable: false)},
       ),
     );
     if (response.statusCode >= 400) throw Exception();

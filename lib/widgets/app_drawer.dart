@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../data/auth_provider.dart';
 import '../screens/order_list_screen.dart';
 import '../screens/product_list_screen.dart';
 import '../screens/products_management_screen.dart';
@@ -18,6 +20,11 @@ class AppDrawer extends StatelessWidget {
           _buildDrawerOption(context, Icons.shop_two, "Products", () => _switchTo(context, ProductListScreen.route)),
           _buildDrawerOption(context, Icons.payment, "Orders", () => _switchTo(context, OrderListScreen.route)),
           _buildDrawerOption(context, Icons.assessment, "Product management", () => _switchTo(context, ProductsManagementScreen.route)),
+          _buildDrawerOption(context, Icons.logout, "Logout", () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pushReplacementNamed('/');
+            context.read<AuthProvider>().logout();
+          }),
         ],
       ),
     );

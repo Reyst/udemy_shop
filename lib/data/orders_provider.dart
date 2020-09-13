@@ -3,16 +3,27 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as Http;
 
+import '../models/token.dart';
 import '../global/constants.dart';
 import '../models/cart_item.dart';
 import '../models/order.dart';
 
 class OrdersProvider with ChangeNotifier {
+
+  String _authKey;
+  String _userId;
+
+  set token(Token token) {
+    _authKey = token?.idToken;
+    _userId = token?.userId;
+    notifyListeners();
+  }
+
   Future<List<Order>> get orders async => _getOrders();
 
   Future<List<Order>> _getOrders() async {
     List<Order> result = [];
-    final url = "${BASE_URL}orders.json";
+    final url = "${BASE_URL}orders/$_userId.json?auth=$_authKey";
     try {
       final response = await Http.get(url);
 
@@ -53,7 +64,7 @@ class OrdersProvider with ChangeNotifier {
 
   Future<void> createOrder(List<CartItem> items) async {
     final order = Order(items);
-    final url = "${BASE_URL}orders/${order.id}.json";
+    final url = "${BASE_URL}orders/$_userId/${order.id}.json?auth=$_authKey";
 
     try {
       await Http.patch(
